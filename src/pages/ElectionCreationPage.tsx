@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Calendar, Clock, Users, Plus, Trash2 } from 'lucide-react';
+import { Plus, Trash2 } from 'lucide-react';
+import { api } from '../services/api';
+import toast from 'react-hot-toast';
 
 interface Candidate {
   id: string;
@@ -18,7 +20,6 @@ const ElectionCreationPage: React.FC = () => {
     description: '',
     startDate: '',
     endDate: '',
-    registrationDeadline: '',
     type: 'general', // general, student, department
   });
 
@@ -56,24 +57,42 @@ const ElectionCreationPage: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsSubmitting(true);
-
+    
+    if (candidates.length === 0) {
+      toast.error('Please add at least one candidate');
+      return;
+    }
+    
     try {
-      // TODO: Integrate with blockchain service
-      // await blockchainService.createElection({
-      //   ...formData,
-      //   candidates,
-      // });
-
-      // Simulate blockchain transaction
-      await new Promise(resolve => setTimeout(resolve, 2000));
-
-      navigate('/admin-dashboard', {
-        state: { message: 'Election created successfully!' }
-      });
+      setIsSubmitting(true);
+      
+      // Format the election data for the API
+      const electionData = {
+        title: formData.title,
+        description: formData.description,
+        startDate: new Date(formData.startDate).toISOString(),
+        endDate: new Date(formData.endDate).toISOString(),
+        type: formData.type,
+        candidates: candidates.map(candidate => ({
+          name: candidate.name,
+          position: candidate.position,
+          party: candidate.party,
+          bio: candidate.bio || ''
+        })),
+        // These fields will be set by the server
+        totalVoters: 0,
+        totalVotes: 0,
+        status: 'upcoming'
+      };
+      
+      // Call the API to create the election
+      await api.createElection('admin', electionData);
+      
+      toast.success('Election created successfully!');
+      navigate('/admin-dashboard');
     } catch (error) {
       console.error('Error creating election:', error);
-      // Handle error appropriately
+      toast.error('Failed to create election. Please try again.');
     } finally {
       setIsSubmitting(false);
     }
@@ -84,7 +103,7 @@ const ElectionCreationPage: React.FC = () => {
       <div className="max-w-4xl mx-auto">
         <h1 className="text-3xl font-bold mb-6">Create New Election</h1>
 
-        <form onSubmit={handleSubmit} className="space-y-8">
+        <form className="space-y-8" onSubmit={handleSubmit}>
           {/* Basic Information */}
           <div className="bg-white p-6 rounded-lg shadow-lg">
             <h2 className="text-xl font-semibold mb-4">Basic Information</h2>

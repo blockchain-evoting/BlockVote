@@ -1,106 +1,40 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Vote, Calendar, Users, Clock } from "lucide-react";
-
-interface Election {
-  id: string;
-  title: string;
-  department: string;
-  description: string;
-  startDate: string;
-  endDate: string;
-  totalVoters: number;
-  status: "upcoming" | "active" | "ended";
-  candidates: Array<{
-    id: string;
-    name: string;
-    position: string;
-    department: string;
-    year: string;
-  }>;
-}
+import { api, Election } from "../services/api";
+import toast from "react-hot-toast";
 
 const Elections: React.FC = () => {
-  // Mock data - replace with actual data from your backend
-  const elections: Election[] = [
-    {
-      id: "1",
-      title: "Computer Science Department Elections",
-      department: "Computer Science",
-      description: "Annual elections for Computer Science Department Student Council positions",
-      startDate: "2025-04-01",
-      endDate: "2025-04-02",
-      totalVoters: 450,
-      status: "upcoming",
-      candidates: [
-        {
-          id: "1",
-          name: "John Smith",
-          position: "Department President",
-          department: "Computer Science",
-          year: "3rd Year"
-        },
-        {
-          id: "2",
-          name: "Sarah Johnson",
-          position: "Department Vice President",
-          department: "Computer Science",
-          year: "3rd Year"
-        }
-      ]
-    },
-    {
-      id: "2",
-      title: "Engineering Department Elections",
-      department: "Engineering",
-      description: "Select your Engineering Department Representatives",
-      startDate: "2025-03-24",
-      endDate: "2025-03-25",
-      totalVoters: 600,
-      status: "active",
-      candidates: [
-        {
-          id: "3",
-          name: "Michael Chen",
-          position: "Department Representative",
-          department: "Engineering",
-          year: "4th Year"
-        },
-        {
-          id: "4",
-          name: "Emily Brown",
-          position: "Department Representative",
-          department: "Engineering",
-          year: "3rd Year"
-        }
-      ]
-    },
-    {
-      id: "3",
-      title: "Business School Council Elections",
-      department: "Business Administration",
-      description: "Choose your Business School student representatives",
-      startDate: "2025-04-15",
-      endDate: "2025-04-16",
-      totalVoters: 350,
-      status: "upcoming",
-      candidates: [
-        {
-          id: "5",
-          name: "David Wilson",
-          position: "Department President",
-          department: "Business Administration",
-          year: "4th Year"
-        },
-        {
-          id: "6",
-          name: "Lisa Anderson",
-          position: "Department Vice President",
-          department: "Business Administration",
-          year: "3rd Year"
-        }
-      ]
+  const navigate = useNavigate();
+  const [elections, setElections] = useState<Election[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    loadElections();
+  }, []);
+
+  const loadElections = async () => {
+    try {
+      setLoading(true);
+      const electionList = await api.listElections();
+      
+      // Sort elections: active first, then upcoming, then ended
+      const sortedElections = [...electionList].sort((a, b) => {
+        const statusOrder = { active: 0, upcoming: 1, ended: 2 };
+        return statusOrder[a.status] - statusOrder[b.status];
+      });
+      
+      setElections(sortedElections);
+      setError(null);
+    } catch (err) {
+      console.error('Failed to load elections:', err);
+      setError('Failed to load elections. Please try again.');
+      toast.error('Failed to load elections');
+    } finally {
+      setLoading(false);
     }
-  ];
+  };
 
   const getStatusColor = (status: Election["status"]) => {
     switch (status) {
@@ -122,92 +56,135 @@ const Elections: React.FC = () => {
             View and participate in current and upcoming department elections. Your vote shapes the future of your academic community.
           </p>
         </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {elections.map((election) => (
-            <div
-              key={election.id}
-              className="bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300"
-            >
-              <div className="p-6">
-                <div className="flex items-start justify-between">
-                  <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                    {election.title}
-                  </h3>
-                  <span
-                    className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize ${getStatusColor(
-                      election.status
-                    )}`}
-                  >
-                    {election.status}
-                  </span>
-                </div>
-                <p className="text-gray-600 mb-4">{election.description}</p>
-                
-                <div className="space-y-3">
-                  <div className="flex items-center text-gray-600">
-                    <Calendar className="h-5 w-5 mr-2" />
-                    <span>
-                      {new Date(election.startDate).toLocaleDateString()} -{" "}
-                      {new Date(election.endDate).toLocaleDateString()}
-                    </span>
-                  </div>
-                  <div className="flex items-center text-gray-600">
-                    <Users className="h-5 w-5 mr-2" />
-                    <span>{election.totalVoters.toLocaleString()} eligible voters</span>
-                  </div>
-                  <div className="flex items-center text-gray-600">
-                    <Clock className="h-5 w-5 mr-2" />
-                    <span>
-                      {election.status === "upcoming"
-                        ? "Starts in " +
-                          Math.ceil(
-                            (new Date(election.startDate).getTime() - new Date().getTime()) /
-                              (1000 * 60 * 60 * 24)
-                          ) +
-                          " days"
-                        : election.status === "active"
-                        ? "Ends in " +
-                          Math.ceil(
-                            (new Date(election.endDate).getTime() - new Date().getTime()) /
-                              (1000 * 60 * 60 * 24)
-                          ) +
-                          " days"
-                        : "Election ended"}
-                    </span>
-                  </div>
-                </div>
-
-                <div className="mt-4 space-y-2">
-                  <h4 className="font-medium text-gray-900">Candidates:</h4>
-                  {election.candidates.map((candidate) => (
-                    <div key={candidate.id} className="text-sm text-gray-600 pl-2">
-                      • {candidate.name} - {candidate.position} ({candidate.year})
-                    </div>
-                  ))}
-                </div>
-
-                <button
-                  className={`mt-6 w-full flex items-center justify-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white ${
-                    election.status === "active"
-                      ? "bg-indigo-600 hover:bg-indigo-700"
-                      : election.status === "upcoming"
-                      ? "bg-yellow-600 hover:bg-yellow-700"
-                      : "bg-gray-400 cursor-not-allowed"
-                  } focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500`}
-                  disabled={election.status === "ended"}
-                >
-                  <Vote className="h-5 w-5 mr-2" />
-                  {election.status === "active"
-                    ? "Vote Now"
-                    : election.status === "upcoming"
-                    ? "View Details"
-                    : "Election Ended"}
-                </button>
-              </div>
+        
+        {loading ? (
+          <div className="text-center py-12">
+            <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-current border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]" role="status">
+              <span className="!absolute !-m-px !h-px !w-px !overflow-hidden !whitespace-nowrap !border-0 !p-0 ![clip:rect(0,0,0,0)]">Loading...</span>
             </div>
-          ))}
-        </div>
+            <p className="mt-2 text-gray-600">Loading elections...</p>
+          </div>
+        ) : error ? (
+          <div className="text-center py-12">
+            <div className="bg-red-50 text-red-700 p-4 rounded-md inline-block">
+              {error}
+            </div>
+            <button 
+              onClick={loadElections}
+              className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 block mx-auto"
+            >
+              Try Again
+            </button>
+          </div>
+        ) : elections.length === 0 ? (
+          <div className="text-center py-12">
+            <p className="text-gray-600">No elections are currently available.</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {elections.map((election) => (
+              <div
+                key={election.id}
+                className="bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300"
+              >
+                <div className="p-6">
+                  <div className="flex items-start justify-between">
+                    <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                      {election.title}
+                    </h3>
+                    <span
+                      className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize ${getStatusColor(
+                        election.status
+                      )}`}
+                    >
+                      {election.status}
+                    </span>
+                  </div>
+                  <p className="text-gray-600 mb-4">{election.description}</p>
+                  
+                  <div className="space-y-3">
+                    <div className="flex items-center text-gray-600">
+                      <Calendar className="h-5 w-5 mr-2" />
+                      <span>
+                        {new Date(election.startDate).toLocaleDateString()} -{" "}
+                        {new Date(election.endDate).toLocaleDateString()}
+                      </span>
+                    </div>
+                    <div className="flex items-center text-gray-600">
+                      <Users className="h-5 w-5 mr-2" />
+                      <span>{election.totalVoters ? election.totalVoters.toLocaleString() : 0} eligible voters</span>
+                    </div>
+                    <div className="flex items-center text-gray-600">
+                      <Clock className="h-5 w-5 mr-2" />
+                      <span>
+                        {election.status === "upcoming"
+                          ? "Starts in " +
+                            Math.ceil(
+                              (new Date(election.startDate).getTime() - new Date().getTime()) /
+                                (1000 * 60 * 60 * 24)
+                            ) +
+                            " days"
+                          : election.status === "active"
+                          ? "Ends in " +
+                            Math.ceil(
+                              (new Date(election.endDate).getTime() - new Date().getTime()) /
+                                (1000 * 60 * 60 * 24)
+                            ) +
+                            " days"
+                          : "Election ended"}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="mt-4 space-y-2">
+                    <h4 className="font-medium text-gray-900">Candidates:</h4>
+                    {election.candidates.length === 0 ? (
+                      <div className="text-sm text-gray-600 pl-2">No candidates available</div>
+                    ) : (
+                      election.candidates.map((candidate) => (
+                        <div key={candidate.id} className="text-sm text-gray-600 pl-2">
+                          • {candidate.name} - {candidate.position} {candidate.year ? `(${candidate.year})` : ''}
+                        </div>
+                      ))
+                    )}
+                  </div>
+
+                  <button
+                    onClick={() => {
+                      if (election.status === "active") {
+                        // For active elections, check if user is logged in before allowing to vote
+                        if (localStorage.getItem('userAuthenticated') === 'true') {
+                          navigate(`/cast-vote/${election.id}`);
+                        } else {
+                          toast.error('Please log in to vote');
+                          navigate('/login', { state: { returnUrl: `/elections/${election.id}` } });
+                        }
+                      } else {
+                        // For non-active elections, just show details
+                        navigate(`/elections/${election.id}`);
+                      }
+                    }}
+                    className={`mt-6 w-full flex items-center justify-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white ${
+                      election.status === "active"
+                        ? "bg-indigo-600 hover:bg-indigo-700"
+                        : election.status === "upcoming"
+                        ? "bg-yellow-600 hover:bg-yellow-700"
+                        : "bg-blue-600 hover:bg-blue-700"
+                    } focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500`}
+                    disabled={false}
+                  >
+                    <Vote className="h-5 w-5 mr-2" />
+                    {election.status === "active"
+                      ? "Vote Now"
+                      : election.status === "upcoming"
+                      ? "View Details"
+                      : "View Results"}
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

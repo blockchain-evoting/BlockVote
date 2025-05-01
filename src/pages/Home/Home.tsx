@@ -1,13 +1,40 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import React from "react";
-import { Vote, BarChart, Shield, Package } from "lucide-react";
+import React, { useEffect, useRef, CSSProperties } from "react";
+import { BarChart, Shield, Package } from "lucide-react";
 import EvoteMockupImage from "./MockupUI";
 import TimeCountDown from "./Home-time-counter";
-import Features from "./Features";
-import Footer from "../../components/Footer";
+
+// Define custom CSS Properties interface to allow for custom properties
+interface CustomCSSProperties extends CSSProperties {
+  '--x-offset'?: string;
+  '--y-offset'?: string;
+}
 
 const EVotingPlatform: React.FC = () => {
-  // const [isOpen, setIsOpen] = useState(false);
+  const shinyTextRef = useRef<HTMLSpanElement | null>(null);
+  
+  useEffect(() => {
+    const shinyText = shinyTextRef.current;
+    if (!shinyText) return;
+    
+    const handleMouseMove = (e: MouseEvent): void => {
+      const { left, top, width, height } = shinyText.getBoundingClientRect();
+      const x = e.clientX - left;
+      const y = e.clientY - top;
+      
+      const centerX = width / 2;
+      const centerY = height / 2;
+      
+      const offsetX = ((x - centerX) / centerX) * 25;
+      const offsetY = ((y - centerY) / centerY) * 25;
+      
+      shinyText.style.setProperty('--x-offset', `${offsetX}%`);
+      shinyText.style.setProperty('--y-offset', `${offsetY}%`);
+    };
+    
+    window.addEventListener('mousemove', handleMouseMove);
+    return () => window.removeEventListener('mousemove', handleMouseMove);
+  }, []);
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-white via-purple-100 to-white">
@@ -16,15 +43,44 @@ const EVotingPlatform: React.FC = () => {
         {/* Hero Section */}
         <section className="container mx-auto px-4 py-12 md:py-20">
           <div className="text-center mb-6">
-            <span className="inline-flex items-center bg-purple-50 text-indigo-600 px-4 py-1  rounded-full text-sm">
-              <span className="h-2 w-2 bg-gradient-to-tr from-violet-300 to-violet-600 rounded-full  mr-2"></span>
+            <span className="inline-flex items-center bg-purple-50 text-indigo-600 px-4 py-1 rounded-full text-sm">
+              <span className="h-2 w-2 bg-gradient-to-tr from-violet-300 to-violet-600 rounded-full mr-2"></span>
               Updated: Blockchain Integrated
             </span>
           </div>
 
           <div className="text-center mb-12">
             <h1 className="text-3xl md:text-5xl font-bold mb-6 leading-tight">
-              The Trusted Platform for
+              <span 
+                ref={shinyTextRef}
+                className="inline-block relative animate-pulse"
+                style={{
+                  background: 'linear-gradient(135deg, #8b5cf6, #6366f1, #a78bfa, #7c3aed)',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                  backgroundSize: '200% 200%',
+                  animation: 'gradient-shine 3s ease-in-out infinite',
+                  textShadow: '0 0 5px rgba(139, 92, 246, 0.3)',
+                  '--x-offset': '0%',
+                  '--y-offset': '0%',
+                } as CustomCSSProperties}
+              >
+                BlockVote
+              </span>
+              <style jsx global>{`
+                @keyframes gradient-shine {
+                  0% {
+                    background-position: 0% 50%;
+                  }
+                  50% {
+                    background-position: 100% 50%;
+                  }
+                  100% {
+                    background-position: 0% 50%;
+                  }
+                }
+              `}</style>
+              , the trusted platform for
               <br />
               Blockchain-Powered Voting
             </h1>

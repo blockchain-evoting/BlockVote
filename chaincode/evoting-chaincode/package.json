@@ -1,0 +1,24 @@
+{
+  "name": "evoting-chaincode",
+  "version": "1.0.0",
+  "description": "E-Voting Chaincode for Hyperledger Fabric",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "engines": {
+    "node": ">=12",
+    "npm": ">=6"
+  },
+  "scripts": {
+    "build": "tsc",
+    "start": "fabric-chaincode-node start",
+    "test": "jest"
+  },
+  "dependencies": {
+    "fabric-contract-api": "^2.2.3",
+    "fabric-shim": "^2.2.3"
+  },
+  "devDependencies": {
+    "@types/node": "^14.14.31",
+    "typescript": "^4.2.2"
+  }
+}

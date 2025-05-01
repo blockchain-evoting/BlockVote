@@ -1,4 +1,5 @@
-import { supabase, subscribeToVotes, cacheElectionResults, getCachedResults } from '../lib/supabase';
+import { supabase, subscribeToVotes, cacheElectionResults } from '../lib/supabase';
+import { api } from './api';
 
 interface VoteUpdate {
     votes: { [candidateId: string]: number };
@@ -41,18 +42,24 @@ export class RealtimeService {
     // Get election results with caching
     async getElectionResults(electionId: string): Promise<VoteUpdate> {
         try {
-            // Try to get cached results first
-            const cached = await getCachedResults(electionId);
-            if (cached && this.isCacheValid(cached.updated_at)) {
-                return cached.results;
+            // Always get fresh results from the local API
+            console.log('Fetching election results from local API for election:', electionId);
+            
+            try {
+                // Try to get results from the local API first
+                const response = await fetch(`${api['request'].defaults.baseURL}/elections/${electionId}/results`);
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    console.log('Received results from local API:', data);
+                    return data;
+                }
+            } catch (localApiError) {
+                console.warn('Error fetching from local API, falling back to Fabric:', localApiError);
             }
-
-            // If cache miss or invalid, get fresh results from Fabric
+            
+            // If local API fails, fall back to Fabric
             const results = await this.getFabricElectionResults(electionId);
-            
-            // Cache the new results
-            await cacheElectionResults(electionId, results);
-            
             return results;
         } catch (error) {
             console.error('Error getting election results:', error);

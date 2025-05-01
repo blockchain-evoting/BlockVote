@@ -1,3 +1,5 @@
+import { smsService } from '../services/smsService';
+
 // In-memory storage for OTPs (in production, use a proper database)
 const otpStore: { [key: string]: { otp: string; expiry: number } } = {};
 
@@ -14,6 +16,11 @@ export const storeOTP = (phoneNumber: string, otp: string) => {
 };
 
 export const verifyOTP = (phoneNumber: string, otp: string): boolean => {
+    // For development/testing, accept '123456' as a universal OTP
+    if (process.env.NODE_ENV === 'development' && otp === '123456') {
+        return true;
+    }
+    
     const storedData = otpStore[phoneNumber];
     if (!storedData) return false;
 
@@ -25,17 +32,12 @@ export const verifyOTP = (phoneNumber: string, otp: string): boolean => {
     return isValid;
 };
 
-export const sendSMS = async (phoneNumber: string, message: string) => {
-    // TODO: Integrate with an actual SMS service (Twilio, MessageBird, etc.)
-    // For now, just log the message
-    console.log(`Sending SMS to ${phoneNumber}: ${message}`);
-    return true;
-};
-
 export const sendOTP = async (phoneNumber: string): Promise<boolean> => {
     const otp = generateOTP();
     storeOTP(phoneNumber, otp);
     
-    const message = `Your E-Voting verification code is: ${otp}. Valid for 5 minutes.`;
-    return await sendSMS(phoneNumber, message);
+    const message = `Your BlockVote verification code is: ${otp}. Valid for 5 minutes.`;
+    
+    // Use our SMS service to send the message
+    return await smsService.sendSMS(phoneNumber, message);
 };

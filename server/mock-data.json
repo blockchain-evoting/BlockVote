@@ -1,0 +1,16 @@
+{
+  "voters": [
+    {
+      "id": "voter_test123",
+      "studentId": "TEST123",
+      "name": "Test User",
+      "department": "Computer Science",
+      "contact": "1234567890",
+      "password": "ef797c8118f02dfb649607dd5d3f8c7623048c9c063d532cc95c5ed7a898a64f",
+      "registeredBy": "system",
+      "registeredAt": "2025-04-25T01:54:56.484Z"
+    }
+  ],
+  "elections": [],
+  "votes": []
+}

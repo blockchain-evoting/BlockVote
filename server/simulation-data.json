@@ -1,0 +1,170 @@
+{
+  "voters": [
+    {
+      "id": "voter_1745547444557",
+      "studentId": "12121212",
+      "name": "Kay",
+      "department": "Business Administration",
+      "contact": "0248425055",
+      "password": "ef797c8118f02dfb649607dd5d3f8c7623048c9c063d532cc95c5ed7a898a64f",
+      "registeredBy": "admin",
+      "registeredAt": "2025-04-25T02:17:24.557Z"
+    },
+    {
+      "id": "voter_1745547755781",
+      "studentId": "13131313",
+      "name": "Josiah",
+      "department": "Computer Science",
+      "contact": "0547834560",
+      "password": "ef797c8118f02dfb649607dd5d3f8c7623048c9c063d532cc95c5ed7a898a64f",
+      "registeredBy": "admin",
+      "registeredAt": "2025-04-25T02:22:35.781Z"
+    },
+    {
+      "id": "voter_1745555968521",
+      "studentId": "11346789",
+      "name": "John Tekorang",
+      "department": "Medicine",
+      "contact": "0593487694",
+      "password": "15e2b0d3c33891ebb0f1ef609ec419420c20e320ce94c65fbc8c3312448eb225",
+      "registeredBy": "admin",
+      "registeredAt": "2025-04-25T04:39:28.521Z"
+    },
+    {
+      "id": "voter_1745662681288",
+      "studentId": "14141414",
+      "name": "Samuel Gyasi Fordjour",
+      "department": "Computer Science",
+      "contact": "0248425044",
+      "password": "ef797c8118f02dfb649607dd5d3f8c7623048c9c063d532cc95c5ed7a898a64f",
+      "registeredBy": "admin",
+      "registeredAt": "2025-04-26T10:18:01.288Z"
+    },
+    {
+      "id": "voter_1745838153254",
+      "studentId": "15151515",
+      "name": "Kay",
+      "department": "Computer Science",
+      "contact": "0248425044",
+      "password": "ef797c8118f02dfb649607dd5d3f8c7623048c9c063d532cc95c5ed7a898a64f",
+      "registeredBy": "admin",
+      "registeredAt": "2025-04-28T11:02:33.254Z"
+    }
+  ],
+  "elections": [
+    {
+      "id": "election_1745548604091",
+      "title": "Compsa",
+      "startDate": "2025-04-25T01:00:00.000Z",
+      "endDate": "2025-04-25T03:59:00.000Z",
+      "totalVoters": 0,
+      "totalVotes": 2,
+      "status": "ended",
+      "candidates": [
+        {
+          "id": "candidate_1745548604144_0",
+          "name": "Josiah",
+          "position": "Sleeping president",
+          "party": "NPP",
+          "bio": "",
+          "voteCount": "101",
+          "year": "2026",
+          "department": "Comp."
+        },
+        {
+          "id": "candidate_1745548604144_1",
+          "name": "Sammy",
+          "position": "Vice",
+          "party": "New Force",
+          "bio": "",
+          "voteCount": "101",
+          "year": "2026",
+          "department": "Comp."
+        }
+      ],
+      "description": "It Zoozible"
+    },
+    {
+      "id": "election_1745664181999",
+      "title": "Compsa 2025",
+      "startDate": "2025-04-26T10:41:00.000Z",
+      "endDate": "2025-04-26T10:49:00.000Z",
+      "totalVoters": 0,
+      "totalVotes": 1,
+      "status": "ended",
+      "candidates": [
+        {
+          "id": "candidate_1745664182051_0",
+          "name": "Me",
+          "position": "President",
+          "party": "GUM",
+          "bio": "",
+          "voteCount": 1
+        },
+        {
+          "id": "candidate_1745664182051_1",
+          "name": "You",
+          "position": "President",
+          "party": "NPP",
+          "bio": "",
+          "voteCount": 0
+        }
+      ],
+      "description": ""
+    },
+    {
+      "id": "election_1745838364929",
+      "title": "Compsa 2026",
+      "startDate": "2025-04-28T11:04:00.000Z",
+      "endDate": "2025-04-28T11:14:00.000Z",
+      "totalVoters": 0,
+      "totalVotes": 1,
+      "status": "ended",
+      "candidates": [
+        {
+          "id": "candidate_1745838364929_0",
+          "name": "Endurance",
+          "position": "President",
+          "party": "",
+          "bio": "",
+          "voteCount": 1
+        },
+        {
+          "id": "candidate_1745838364929_1",
+          "name": "Josiah",
+          "position": "President",
+          "party": "",
+          "bio": "",
+          "voteCount": 0
+        }
+      ],
+      "description": ""
+    }
+  ],
+  "votes": [
+    {
+      "electionId": "election_1745548604091",
+      "candidateId": "candidate_1745548604144_0",
+      "voterId": "voter_1745547444557",
+      "timestamp": "2025-04-25T03:44:07.053Z"
+    },
+    {
+      "electionId": "election_1745548604091",
+      "candidateId": "candidate_1745548604144_1",
+      "voterId": "voter_1745547755781",
+      "timestamp": "2025-04-25T03:54:16.580Z"
+    },
+    {
+      "electionId": "election_1745664181999",
+      "candidateId": "candidate_1745664182051_0",
+      "voterId": "voter_1745662681288",
+      "timestamp": "2025-04-26T10:46:05.802Z"
+    },
+    {
+      "electionId": "election_1745838364929",
+      "candidateId": "candidate_1745838364929_0",
+      "voterId": "voter_1745838153254",
+      "timestamp": "2025-04-28T11:13:30.486Z"
+    }
+  ]
+}

@@ -1,11 +1,10 @@
 import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
-import { Eye, EyeOff, LogIn } from 'lucide-react';
-import { authService } from '../services/authService';
+import { useNavigate } from 'react-router-dom';
+import { Eye, EyeOff, LogIn, Shield } from 'lucide-react';
+import toast from 'react-hot-toast';
 
-const LoginPage: React.FC = () => {
-  const [studentId, setStudentId] = useState('');
-  const [contact, setContact] = useState('');
+const AdminLoginPage: React.FC = () => {
+  const [adminId, setAdminId] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -18,32 +17,39 @@ const LoginPage: React.FC = () => {
     setLoading(true);
 
     try {
-      // Attempt to login with provided credentials
-      await authService.login({ studentId, password, contact });
-      
-      // If login successful, redirect to OTP verification
-      navigate('/2fa', { 
-        state: { 
-          contact,
-          studentId
-        } 
-      });
+      // For demo purposes, use a hardcoded admin credential
+      // In a real application, this would validate against a secure backend
+      if (adminId === 'admin' && password === 'admin123') {
+        // Store admin session info
+        localStorage.setItem('adminAuthenticated', 'true');
+        localStorage.setItem('adminId', 'admin123');
+        
+        // Redirect to admin dashboard
+        toast.success('Admin login successful');
+        navigate('/admin-dashboard');
+      } else {
+        throw new Error('Invalid admin credentials');
+      }
     } catch (err) {
-      setError('Invalid Student ID, contact, or password');
+      setError('Invalid admin ID or password');
+      toast.error('Login failed');
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-white via-purple-100 to-white flex items-center justify-center px-4">
+    <div className="min-h-screen bg-gradient-to-b from-white via-blue-100 to-white flex items-center justify-center px-4">
       <div className="max-w-md w-full space-y-8 bg-white p-8 rounded-xl shadow-lg">
-        <div>
+        <div className="text-center">
+          <div className="mx-auto h-12 w-12 rounded-full bg-blue-100 flex items-center justify-center">
+            <Shield className="h-6 w-6 text-blue-600" />
+          </div>
           <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-            Student Login
+            Admin Login
           </h2>
           <p className="mt-2 text-center text-sm text-gray-600">
-            Enter your credentials to access the voting system
+            Enter your credentials to access the admin dashboard
           </p>
         </div>
 
@@ -56,34 +62,18 @@ const LoginPage: React.FC = () => {
 
           <div className="rounded-md shadow-sm space-y-4">
             <div>
-              <label htmlFor="student-id" className="block text-sm font-medium text-gray-700">
-                Student ID
+              <label htmlFor="admin-id" className="block text-sm font-medium text-gray-700">
+                Admin ID
               </label>
               <input
-                id="student-id"
-                name="student-id"
+                id="admin-id"
+                name="admin-id"
                 type="text"
                 required
-                value={studentId}
-                onChange={(e) => setStudentId(e.target.value)}
-                className="appearance-none relative block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-                placeholder="Enter your Student ID"
-              />
-            </div>
-
-            <div>
-              <label htmlFor="contact" className="block text-sm font-medium text-gray-700">
-                Contact Number
-              </label>
-              <input
-                id="contact"
-                name="contact"
-                type="tel"
-                required
-                value={contact}
-                onChange={(e) => setContact(e.target.value)}
-                className="appearance-none relative block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-                placeholder="Enter your contact number"
+                value={adminId}
+                onChange={(e) => setAdminId(e.target.value)}
+                className="appearance-none relative block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
+                placeholder="Enter your Admin ID"
               />
             </div>
 
@@ -99,7 +89,7 @@ const LoginPage: React.FC = () => {
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="appearance-none relative block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm pr-10"
+                  className="appearance-none relative block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm pr-10"
                   placeholder="Enter your password"
                 />
                 <button
@@ -123,18 +113,21 @@ const LoginPage: React.FC = () => {
               disabled={loading}
               className={`group relative w-full flex justify-center items-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white ${
                 loading
-                  ? 'bg-indigo-400 cursor-not-allowed'
-                  : 'bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500'
+                  ? 'bg-blue-400 cursor-not-allowed'
+                  : 'bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500'
               }`}
             >
               <LogIn className="h-5 w-5 mr-2" aria-hidden="true" />
-              {loading ? 'Logging in...' : 'Log in'}
+              {loading ? 'Logging in...' : 'Admin Login'}
             </button>
           </div>
-          
-          <div className="text-center mt-4">
-            <Link to="/admin/login" className="text-sm text-indigo-600 hover:text-indigo-500">
-              Admin Login
+
+          <div className="text-center">
+            <Link
+              to="/login"
+              className="text-sm text-blue-600 hover:text-blue-500"
+            >
+              Back to Voter Login
             </Link>
           </div>
         </form>
@@ -143,4 +136,7 @@ const LoginPage: React.FC = () => {
   );
 };
 
-export default LoginPage;
+export default AdminLoginPage;
+
+// Add the Link import at the top
+import { Link } from 'react-router-dom';

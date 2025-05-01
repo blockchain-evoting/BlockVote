@@ -1,6 +1,31 @@
 import axios from 'axios';
 
-const API_BASE_URL = 'http://localhost:5000/api';
+// Dynamic API URL configuration
+const getApiBaseUrl = () => {
+    // Try to read the API port from the .api-port file via localStorage
+    // This file is created by the server when it starts
+    // If not available, try to use port 3001 (default simulation server port)
+    const apiPort = localStorage.getItem('api_port') || '3001';
+    
+    console.log(`Using API port: ${apiPort}`);
+    
+    // Force direct connection to the simulation server
+    // This ensures we bypass any proxy issues
+    return `http://localhost:${apiPort}/api`;
+    
+    // Original implementation with proxy support
+    // const useProxy = import.meta.env.DEV && !import.meta.env.VITE_DISABLE_PROXY;
+    // if (useProxy) {
+    //     // In development with proxy, use relative URL
+    //     return '/api';
+    // } else {
+    //     // Direct connection to API server
+    //     return `http://localhost:${apiPort}/api`;
+    // }
+};
+
+// Initialize with a default, but this will be determined dynamically at runtime
+let API_BASE_URL = getApiBaseUrl();
 
 export interface Candidate {
     id: string;
@@ -15,6 +40,7 @@ export interface Candidate {
 export interface Election {
     id: string;
     title: string;
+    description?: string;
     startDate: string;
     endDate: string;
     totalVoters: number;
@@ -53,6 +79,9 @@ class ApiService {
 
     private async request<T>(method: string, endpoint: string, data?: any): Promise<T> {
         try {
+            // Refresh the API URL before each request to ensure we're using the latest configuration
+            API_BASE_URL = getApiBaseUrl();
+            
             const headers: Record<string, string> = {
                 'Content-Type': 'application/json',
             };
@@ -60,7 +89,9 @@ class ApiService {
             if (this.token) {
                 headers['Authorization'] = `Bearer ${this.token}`;
             }
-
+            
+            console.log(`Making API request to: ${API_BASE_URL}${endpoint}`);
+            
             const response = await axios({
                 method,
                 url: `${API_BASE_URL}${endpoint}`,
@@ -98,16 +129,20 @@ class ApiService {
         await this.request('POST', '/voters/register', { adminId, voter });
     }
 
-    async listVoters(): Promise<Voter[]> {
+    async listVoters(p0: string): Promise<Voter[]> {
         return this.request<Voter[]>('GET', '/voters');
     }
 
-    async updateVoter(voter: Voter): Promise<void> {
-        await this.request('PUT', `/voters/${voter.id}`, voter);
+    async getVoter(adminId: string, studentId: string): Promise<Voter> {
+        return this.request<Voter>('GET', `/voters/student/${studentId}?adminId=${adminId}`);
     }
 
-    async deleteVoter(voterId: string): Promise<void> {
-        await this.request('DELETE', `/voters/${voterId}`);
+    async updateVoter(adminId: string, voter: Voter): Promise<void> {
+        await this.request('PUT', `/voters/${voter.id}`, { ...voter, adminId });
+    }
+
+    async deleteVoter(adminId: string, voterId: string): Promise<void> {
+        await this.request('DELETE', `/voters/${voterId}?adminId=${adminId}`);
     }
 
     // Election Management
@@ -123,9 +158,21 @@ class ApiService {
     async listElections(): Promise<Election[]> {
         return this.request<Election[]>('GET', '/elections');
     }
+    
+    async createElection(adminId: string, election: Omit<Election, 'id'>): Promise<Election> {
+        return this.request<Election>('POST', '/elections', { adminId, election });
+    }
+    
+    async updateElection(adminId: string, election: Election): Promise<Election> {
+        return this.request<Election>('PUT', `/elections/${election.id}`, { adminId, ...election });
+    }
+    
+    async deleteElection(adminId: string, electionId: string): Promise<void> {
+        await this.request('DELETE', `/elections/${electionId}?adminId=${adminId}`);
+    }
 
-    async castVote(electionId: string, candidateId: string): Promise<void> {
-        await this.request('POST', '/votes/cast', { electionId, candidateId });
+    async castVote(electionId: string, candidateId: string, voterId: string): Promise<void> {
+        await this.request('POST', '/votes/cast', { electionId, candidateId, voterId });
     }
 }
 
